@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.kuaf</groupId>
+    <artifactId>kuaf</artifactId>
+    <version>${revision}</version>
+    <name>${project.artifactId}</name>
+    <description>Kuaf项目</description>
+    <url>https://github.com/wulerenn/kuaf</url>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>kuaf-dependencies</module>
+        <module>kuaf-framework</module>
+        <module>kuaf-auth</module>
+        <module>kuaf-modules-system</module>
+    </modules>
+
+    <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
+        <!-- Maven 相关 -->
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+        <!-- 看看咋放到 bom 里 -->
+        <lombok.version>1.18.30</lombok.version>
+        <solon.version>3.0.3</solon.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.kuaf</groupId>
+                <artifactId>kuaf-dependencies</artifactId>
+                <version>${revision}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!--全局依赖-->
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+<!--        <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>-->
+        <pluginManagement>
+            <plugins>
+                <!--打包-->
+                <plugin>
+                    <groupId>org.noear</groupId>
+                    <artifactId>solon-maven-plugin</artifactId>
+                </plugin>
+                <!-- maven-surefire-plugin 插件，用于运行单元测试。 -->
+                <!-- 注意，需要使用 3.0.X+，因为要支持 Junit 5 版本 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+                <!-- maven-compiler-plugin 插件，解决 Lombok + MapStruct 组合 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!-- 统一 revision 版本 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten-maven-plugin.version}</version>
+                <configuration>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                    <outputDirectory>${project.build.directory}/flatten</outputDirectory>
+                    <flattenedPomFilename>${project.artifactId}-flatten-pom.xml</flattenedPomFilename>
+                    <updatePomFile>true</updatePomFile>
+                </configuration>
+<!--                <configuration>
+                    <flattenMode>oss</flattenMode>
+                    <updatePomFile>true</updatePomFile>
+                </configuration>-->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                    </execution>
+                    <execution>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>tencent</id>
+            <url>https://mirrors.cloud.tencent.com/nexus/repository/maven-public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+</project>
